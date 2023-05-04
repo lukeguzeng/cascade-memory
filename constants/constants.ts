@@ -35,7 +35,7 @@ export enum FrenchWord {
   limestone = `calcaire`,
 }
 
-export const TranslationMap = new Map<EnglishWord, FrenchWord>([
+export const TranslationMap = new Map<string, string>([
   [EnglishWord.forest, FrenchWord.forest],
   [EnglishWord.sibling, FrenchWord.sibling],
   [EnglishWord.cereal, FrenchWord.cereal],
