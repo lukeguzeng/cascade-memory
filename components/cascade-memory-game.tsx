@@ -29,27 +29,18 @@ export function CascadeMemoryGame({ ...props }) {
     string | undefined
   >(undefined);
 
-  const [selectedFrenchWord, setSelectedFrenchWord] = useState<
-    string | undefined
-  >(undefined);
-
   const buttonText = (): string => {
-    if (gameState === GameState.InGame) {
-      return 'Grade';
-    }
+    if (gameState === GameState.InGame) return 'Grade';
+    if (score != -1) return 'Go Again';
     return 'Go';
   };
 
   const gradeGame = (matchedWords: MatchedWord[]): number => {
-    return matchedWords.reduce((accumulator, currentValue) => {
-      console.log(translate(currentValue.englishWord));
-      console.log(currentValue.frenchWord);
-
+    return matchedWords.reduce((score, currentValue) => {
       if (translate(currentValue.englishWord) == currentValue.frenchWord) {
-        console.log('here');
-        return accumulator + 10;
+        return score + 10;
       }
-      return accumulator;
+      return score;
     }, 0);
   };
 
@@ -58,10 +49,11 @@ export function CascadeMemoryGame({ ...props }) {
       setScore(gradeGame(matchedWords));
       setGameState(GameState.Ready);
     } else {
-      resetAndStartGame();
+      startNewGame();
     }
   };
-  const resetAndStartGame = () => {
+
+  const startNewGame = () => {
     setEnglishWords(getShuffledEnglishWords());
     setFrenchWords(getShuffledFrenchWords());
 
@@ -71,22 +63,34 @@ export function CascadeMemoryGame({ ...props }) {
     setGameState(GameState.InGame);
   };
 
-  const DisplayedScore = () => {
+  const displayedScore = () => {
     if (score === InitailScore || gameState === GameState.InGame) return;
     return <div>{score}</div>;
   };
 
   const EnlishWordList = () => {
-    return englishWords.map((word: string) => {
+    if (englishWords.length == 0) return;
+
+    const tmp = englishWords.map((word: string) => {
       return (
-        <div key={word} onMouseDown={() => onEnglishWordMouseDown(word)}>
+        <div
+          key={word}
+          onMouseDown={(event) => onEnglishWordMouseDown(event, word)}
+          className="select-none"
+        >
           {word}
         </div>
       );
     });
+    return (
+      <div>
+        <div>English Words</div>
+        {tmp}
+      </div>
+    );
   };
 
-  const onEnglishWordMouseDown = (word: string) => {
+  const onEnglishWordMouseDown = (event: any, word: string) => {
     setMatchedWords(
       matchedWords.filter((x: MatchedWord) => x.englishWord != word)
     );
@@ -107,38 +111,39 @@ export function CascadeMemoryGame({ ...props }) {
     if (!selectedEnglishWord) return;
 
     setMatchedWords([
-      ...matchedWords.filter((x: MatchedWord) => {
-        console.log(x.frenchWord);
-        console.log(x.frenchWord == word);
-        return x.frenchWord != word;
-      }),
+      ...matchedWords.filter((x: MatchedWord) => x.frenchWord != word),
       {
         englishWord: selectedEnglishWord,
         frenchWord: word,
       },
     ]);
   };
+
   const FrenchWordList = () => {
     return frenchWords.map((word: string) => {
       return (
         <div key={word} onMouseUp={() => onFrenchWordMouseUp(word)}>
-          {' '}
           {word}
         </div>
       );
     });
   };
 
+  const MatchLinks = () => {
+    return <div></div>;
+  };
+
   return (
     <>
-      <div>
-        Cascade Memory Game {selectedEnglishWord} {selectedFrenchWord}
-      </div>
-      {matchedWordList()}
-      {DisplayedScore()}
+      <div>Cascade Memory Game</div>
       <div onClick={() => buttonAction()}>{buttonText()}</div>
-      {EnlishWordList()}
-      {FrenchWordList()}
+      {displayedScore()}
+      {matchedWordList()}
+      <div className="flex">
+        <div className="w-40">{EnlishWordList()}</div>
+        <div className="w-40">{MatchLinks()}</div>
+        <div className="w-40">{FrenchWordList()}</div>
+      </div>
     </>
   );
 }
