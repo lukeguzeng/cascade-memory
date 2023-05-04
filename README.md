@@ -20,8 +20,9 @@ $ docker run -p 3000:3000 cascade-memory
 Main component(s):
 
 1. Casade Memory Game Component:
-   1. Main function: startGame
-   2. Main events: onButtonClick, onEnglishWordMouseDown, onFrenchWordMouseUp
+   1. Lifecycle function: startGame
+   1. States: gameState, score, englishWords, frenchWords, matchedWords, selectedEnglishWord
+   1. Events: onButtonClick, onEnglishWordMouseDown, onFrenchWordMouseUp
 
 Main static functions:
 
