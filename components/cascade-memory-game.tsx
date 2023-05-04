@@ -1,21 +1,11 @@
-import { shuffle } from '@/composables/shuffle';
-import { translate } from '@/composables/translate';
+import { grade } from '@/composables/grade';
 import {
   getShuffledEnglishWords,
   getShuffledFrenchWords,
 } from '@/composables/word';
-import {
-  EnglishWord,
-  FrenchWord,
-  GameState,
-  InitailScore,
-} from '@/constants/constants';
+import { GameState, InitailScore } from '@/constants/constants';
+import { MatchedWord } from '@/type';
 import { useState } from 'react';
-
-interface MatchedWord {
-  englishWord: string;
-  frenchWord: string;
-}
 
 export function CascadeMemoryGame({ ...props }) {
   const [gameState, setGameState] = useState(GameState.Ready);
@@ -29,36 +19,12 @@ export function CascadeMemoryGame({ ...props }) {
     string | undefined
   >(undefined);
 
-  const buttonText = (): string => {
-    if (gameState === GameState.InGame) return 'Grade';
-    if (score != -1) return 'Go Again';
-    return 'Go';
-  };
-
-  const gradeGame = (matchedWords: MatchedWord[]): number => {
-    return matchedWords.reduce((score, currentValue) => {
-      if (translate(currentValue.englishWord) == currentValue.frenchWord) {
-        return score + 10;
-      }
-      return score;
-    }, 0);
-  };
-
-  const buttonAction = () => {
-    if (gameState === GameState.InGame) {
-      setScore(gradeGame(matchedWords));
-      setGameState(GameState.Ready);
-    } else {
-      startNewGame();
-    }
-  };
-
   const startNewGame = () => {
     setEnglishWords(getShuffledEnglishWords());
     setFrenchWords(getShuffledFrenchWords());
 
     setMatchedWords([]);
-    setScore(-1);
+    setScore(InitailScore);
 
     setGameState(GameState.InGame);
   };
@@ -69,42 +35,49 @@ export function CascadeMemoryGame({ ...props }) {
   };
 
   const EnlishWordList = () => {
-    if (englishWords.length == 0) return;
+    let rowCount: number = 1;
+    return englishWords.map((word: string) => {
+      let bgColor = rowCount % 2 == 1 ? 'bg-cyan-600' : 'bg-cyan-500';
+      if (selectedEnglishWord == word) bgColor = 'bg-cyan-900';
+      rowCount = rowCount + 1;
 
-    const tmp = englishWords.map((word: string) => {
       return (
         <div
           key={word}
           onMouseDown={(event) => onEnglishWordMouseDown(event, word)}
-          className="select-none"
+          className={`select-none text-center ${bgColor}`}
         >
           {word}
         </div>
       );
     });
-    return (
-      <div>
-        <div>English Words</div>
-        {tmp}
-      </div>
-    );
   };
 
+  const FrenchWordList = () => {
+    let rowCount: number = 1;
+
+    return frenchWords.map((word: string) => {
+      const bgColor = rowCount % 2 == 1 ? 'bg-lime-600' : 'bg-lime-500';
+      rowCount = rowCount + 1;
+
+      return (
+        <div
+          className={`text-center ${bgColor}`}
+          key={word}
+          onMouseUp={() => onFrenchWordMouseUp(word)}
+        >
+          {word}
+        </div>
+      );
+    });
+  };
+
+  // actions
   const onEnglishWordMouseDown = (event: any, word: string) => {
     setMatchedWords(
       matchedWords.filter((x: MatchedWord) => x.englishWord != word)
     );
     setSelectedEnglishWord(word);
-  };
-
-  const matchedWordList = () => {
-    return matchedWords.map((matchWord: MatchedWord) => {
-      return (
-        <div key={matchWord.englishWord}>
-          {matchWord.englishWord} , {matchWord.frenchWord}
-        </div>
-      );
-    });
   };
 
   const onFrenchWordMouseUp = (word: string) => {
@@ -117,32 +90,52 @@ export function CascadeMemoryGame({ ...props }) {
         frenchWord: word,
       },
     ]);
+    setSelectedEnglishWord(undefined);
   };
 
-  const FrenchWordList = () => {
-    return frenchWords.map((word: string) => {
-      return (
-        <div key={word} onMouseUp={() => onFrenchWordMouseUp(word)}>
-          {word}
-        </div>
-      );
-    });
+  const onButtonClick = () => {
+    if (gameState === GameState.InGame) {
+      setScore(grade(matchedWords));
+      setGameState(GameState.Ready);
+    } else {
+      startNewGame();
+    }
   };
 
-  const MatchLinks = () => {
-    return <div></div>;
+  const buttonText = (): string => {
+    if (gameState === GameState.InGame) return 'Grade';
+    if (score != InitailScore) return 'Go Again';
+    return 'Go';
   };
 
   return (
     <>
       <div>Cascade Memory Game</div>
-      <div onClick={() => buttonAction()}>{buttonText()}</div>
+      <button
+        onClick={() => onButtonClick()}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        {buttonText()}
+      </button>
       {displayedScore()}
-      {matchedWordList()}
       <div className="flex">
-        <div className="w-40">{EnlishWordList()}</div>
-        <div className="w-40">{MatchLinks()}</div>
-        <div className="w-40">{FrenchWordList()}</div>
+        <div className="w-40">
+          <div className="bg-cyan-800 text-center">English Words</div>
+          {EnlishWordList()}
+        </div>
+        <div className="w-80">
+          {matchedWords.map((matchWord: MatchedWord) => {
+            return (
+              <div key={matchWord.englishWord} className="text-center">
+                {matchWord.englishWord} , {matchWord.frenchWord}
+              </div>
+            );
+          })}
+        </div>
+        <div className="w-40">
+          <div className="bg-lime-800 text-center">French Words</div>
+          {FrenchWordList()}
+        </div>
       </div>
     </>
   );
