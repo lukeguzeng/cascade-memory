@@ -1,3 +1,14 @@
+### Start Commands:
+
+```
+$ docker build -t cascade-memory .
+$ docker run -p 3000:3000 cascade-memory
+```
+
+### Live Demo
+
+[Cascade Memory Demo](https://cascade-memory-lukeguzeng.vercel.app/) (host on vercel.com)
+
 ### Dev Note
 
 1. Tech Stacks: Next, TypeScript, Tailwind CSS
@@ -9,7 +20,7 @@
 Main component(s):
 
 1. Casade Memory Game Component:
-   1. Main function: startGame,
+   1. Main function: startGame
    2. Main events: onButtonClick, onEnglishWordMouseDown, onFrenchWordMouseUp
 
 Main static functions:
@@ -21,10 +32,3 @@ Main static functions:
 5. getShuffledFrenchWords
 
 Main constants: EnglishWord, FrenchWord, TranslationMap
-
-### Start Commands:
-
-```
-$ docker build -t cascade-memory .
-$ docker run -p 3000:3000 cascade-memory
-```
